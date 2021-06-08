@@ -62,6 +62,7 @@ class ConstructionGridView(forms.Dialog[bool]):
         self.Resizable = True
         self.m_gridview = forms.GridView()
         self.m_gridview.ShowHeader = True
+        self.m_gridview.Height = 300
         
         self.m_gridview.DataStore = data
         

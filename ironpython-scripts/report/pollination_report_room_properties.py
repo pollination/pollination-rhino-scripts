@@ -68,8 +68,8 @@ class RoomGridView(forms.Dialog[bool]):
         self.Resizable = True
         self.m_gridview = forms.GridView()
         self.m_gridview.ShowHeader = True
-        
         self.m_gridview.DataStore = data
+        self.m_gridview.Height = 300
         
         self._header = ('display_name', 'floor_area [{}2]'.format(unit),
         'volume [{}3]'.format(unit), 'exposed_area [{}2]'.format(unit),
