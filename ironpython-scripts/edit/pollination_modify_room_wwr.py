@@ -160,7 +160,7 @@ def get_aperture_breps(group_faces, in_ratio, out_ratio):
 class RatioSelection(forms.Dialog[list]):
     
     def __init__(self, in_ratio, overall_ratio):
-        self.Title = 'Story Selection - move roof/ceilings'
+        self.Title = 'WWR Editor'
         self.Resizable = True
         self.Width = 400
         
