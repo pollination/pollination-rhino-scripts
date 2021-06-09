@@ -137,7 +137,7 @@ class RoomGridView(forms.Dialog[bool]):
                 writer.writerow(self._header)
                 writer.writerows(data)
             
-            forms.MessageBox.Show(self, "Done!", self.Title);
+            forms.MessageBox.Show(self, "Done!", self.Title)
 
 # create the dataset
 data = []
