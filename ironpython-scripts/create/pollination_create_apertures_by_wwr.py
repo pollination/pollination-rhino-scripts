@@ -114,8 +114,7 @@ def get_aperture_brep_from_json_room(hb_json, ratio, win_height, sill_height, ho
 
 # GO BACK TO POLLINATION RHINO
 #---------------------------------------------------------------------------------------------#
-# It does not work with Pollination Panel
-# Can you help me with this part Mingbo?
+# TODO: Fix the model panel issue
 
 ratio = [0.2, 0.2, 0.2, 0.2]
 
