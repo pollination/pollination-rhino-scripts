@@ -15,11 +15,15 @@ import Rhino
 
 # import pollination part
 import clr
-clr.AddReference('Share.dll')
+clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
-import HoneybeeSchema as HB # csharp version of HB Schema
-import Share as SH # It contains Pollination RhinoObject classes
-import Share.Convert as CO # It contains utilities to convert RhinoObject <> HB Schema
+import System.Guid
+import HoneybeeSchema as hb # csharp version of HB Schema
+import Core as sh # It contains Pollination RhinoObject classes
+import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
+
+# Pollination Rhino Plugin is inside rhp
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
 
 # import List collection
 from System.Collections.Generic import List
@@ -27,7 +31,7 @@ from System.Collections.Generic import List
 # USER PARAMETERS
 # --------------------------------------------------------------------------------------------#
 # custom window simple glass ID, U, SHGC, DisplayName, VLT
-simple_glass = HB.EnergyWindowMaterialSimpleGlazSys("my_glass_0_75", 1.5, 0.75, "my_glass_0_75", 0.8)
+simple_glass = hb.EnergyWindowMaterialSimpleGlazSys("my_glass_0_75", 1.5, 0.75, "my_glass_0_75", 0.8)
 # --------------------------------------------------------------------------------------------#
 
 # SELECTION PART
@@ -36,7 +40,7 @@ simple_glass = HB.EnergyWindowMaterialSimpleGlazSys("my_glass_0_75", 1.5, 0.75, 
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = SH.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
 
 # start the command
 go = Rhino.Input.Custom.GetObject()
@@ -50,7 +54,7 @@ go.AcceptNothing(True)
 go.GetMultiple(0, 0)
 
 # filter by rooms
-rooms = [_.Object() for _ in go.Objects() if isinstance(_.Object(), SH.Objects.RoomObject)]
+rooms = [_.Object() for _ in go.Objects() if isinstance(_.Object(), sh.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('Please, select pollination rooms')
@@ -66,14 +70,14 @@ identifiers = [mat.Obj.Identifier for mat in properties.Energy.Materials]
 # add window material to the model library
 if simple_glass.Identifier not in identifiers:
     print '{} to Library'.format(simple_glass.DisplayName)
-    HB.Extension.AddMaterial(properties.Energy, simple_glass)
+    hb.Extension.AddMaterial(properties.Energy, simple_glass)
 
 # custom window construction
 glass_construction_materials = List[str]()
 glass_construction_materials.Add(simple_glass.Identifier)
 
 # create window construction
-window_construction = HB.WindowConstructionAbridged("my_simple_window_construction_abridged", glass_construction_materials, "my_simple_window_construction")
+window_construction = hb.WindowConstructionAbridged("my_simple_window_construction_abridged", glass_construction_materials, "my_simple_window_construction")
 
 # get all construction identifiers
 identifiers = [mat.Obj.Identifier for mat in properties.Energy.Constructions]
@@ -81,7 +85,7 @@ identifiers = [mat.Obj.Identifier for mat in properties.Energy.Constructions]
 # add window abridged construction to the model library
 if window_construction.Identifier not in identifiers:
     print '{} to Library'.format(window_construction.DisplayName)
-    HB.Extension.AddConstruction(properties.Energy, window_construction)
+    hb.Extension.AddConstruction(properties.Energy, window_construction)
 
 # apply my custom window abridged construcition to apertures of the selected rooms
 for rm in rooms:

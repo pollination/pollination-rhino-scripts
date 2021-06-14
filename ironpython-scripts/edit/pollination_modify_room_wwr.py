@@ -13,13 +13,17 @@ import Eto.Forms as forms
 
 # import pollination part
 import clr
-clr.AddReference('Share.dll')
+clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import System.Guid
-import HoneybeeSchema as HB # csharp version of HB Schema
-import Share as SH # It contains Pollination RhinoObject classes
-import Share.Convert as CO # It contains utilities to convert RhinoObject <> HB Schema
-from Share.Entity import EntityHelper
+import HoneybeeSchema as hb # csharp version of HB Schema
+import Core as sh # It contains Pollination RhinoObject classes
+import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
+from Core.Entity import EntityHelper
+from System.Collections.Generic import List
+
+# Pollination Rhino Plugin is inside rhp
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
 
 # STRATEGY
 # Pollination rooms > JSON > Honeybee rooms > JSON > Pollination rooms
@@ -30,14 +34,14 @@ from Share.Entity import EntityHelper
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = SH.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # get all objects
 objects = Rhino.RhinoDoc.ActiveDoc.Objects
 
 # filter by rooms
-rooms = [_ for _ in objects if isinstance(_, SH.Objects.RoomObject)]
+rooms = [_ for _ in objects if isinstance(_, sh.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('No rooms found.')
@@ -240,7 +244,6 @@ class RatioSelection(forms.Dialog[list]):
 
 # GO BACK TO POLLINATION RHINO
 #---------------------------------------------------------------------------------------------#
-# TODO: Fix the model panel issue
 
 # create objects first
 hb_rooms = []
@@ -272,15 +275,21 @@ for rm in rooms:
     # create new apertures
     apertures = []
     for brp in breps:
-        apt = SH.Objects.ApertureObject(brp)
+        apt = sh.Objects.ApertureObject(brp)
         apt.Id = System.Guid.NewGuid()
         apertures.append(apt)
     
+    # add new apertures
     new_room, added_apts = rm.AddApertures(apertures, tol, a_tol)
     if not added_apts: continue
     
-    for apt in added_apts:
+    for apt in added_apts: 
         doc.Objects.AddRhinoObject(apt)
     
-    doc.Objects.Replace(Rhino.DocObjects.ObjRef(rm.Id), new_room)
+    # create a List of rooms
+    new_room.Id = rm.Id
+    rooms = List[sh.Objects.RoomObject]()
+    rooms.Add(new_room)
+    
+    PollinationRhinoPlugIn.UpdateHBObjs(doc, rooms)
 doc.Views.Redraw()

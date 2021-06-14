@@ -11,13 +11,17 @@ import Eto.Forms as forms
 
 # import pollination part
 import clr
-clr.AddReference('Share.dll')
+clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 clr.AddReference('Honeybee.UI.Rhino.dll')
-import HoneybeeSchema as HB # csharp version of HB Schema
-import Share as SH # It contains Pollination RhinoObject classes
-import Share.Convert as CO # It contains utilities to convert RhinoObject <> HB Schema
-import Honeybee.UI as HU
+import HoneybeeSchema as hb # csharp version of HB Schema
+import Core as sh # It contains Pollination RhinoObject classes
+import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
+import Honeybee.UI as hu
+from System.Collections.Generic import List
+
+# Pollination Rhino Plugin is inside rhp
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
 
 # SELECTION PART
 #---------------------------------------------------------------------------------------------#
@@ -25,7 +29,7 @@ import Honeybee.UI as HU
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = SH.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 default_height = {
@@ -96,15 +100,21 @@ class RoomGridView(forms.Dialog[list]):
     
     def OnDoubleClickLayer(self, s, e):
         # Properties of the Model
-        properties = current_model.HBModelProperties
-        energy_prop = properties.Energy
-        room_energy_prop = HB.RoomEnergyPropertiesAbridged()
+        properties = current_model.HBModelProperties.DuplicateModelProperties()
+        room_prop = hb.RoomPropertiesAbridged()
+        dummy_room = hb.Room("", List[hb.Face](), room_prop)
         
-        dialog = HU.Dialog_RoomEnergyProperty(energy_prop, room_energy_prop, True)
+        # create a List of rooms
+        rooms = List[hb.Room]()
+        rooms.Add(dummy_room)
+        
+        dialog = hu.Dialog_RoomProperty(properties, rooms)
         dialog_rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
         
         if dialog_rc:
-            self._data_dict[e.Row] = dialog_rc
+            room = dialog_rc[0]
+            energy = room.Properties.Energy
+            self._data_dict[e.Row] = energy
 
 def select_objects(layer_table_names):
     objects = []
@@ -140,13 +150,14 @@ data = [[n, h, c, g] for n, h, c, g in zip(layer_table_names, heights, checked, 
 dialog = RoomGridView(data)
 rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
 
-# TODO: fix refresh issue with ModelDialog
 if rc:
     # create pollination rooms
     for dt in rc:
-        print dt
         name, height, checked, geometries, properties = dt
-        #if not checked: continue
+        
+        # create a List of rooms
+        rooms = List[sh.Objects.RoomObject]()
+        
         for geo in geometries:
             geo = create_solid(geo, height)
             if (geo is None or not geo.IsValid or not geo.IsSolid): continue
@@ -155,16 +166,13 @@ if rc:
             
             if brep_object:
                 brep = Rhino.Geometry.Brep.TryConvertBrep(brep_object.Geometry)
-                new_room = SH.Objects.RoomObject(brep, tol)
+                new_room = sh.Objects.RoomObject(brep, tol)
                 new_room.SetEnergyProp(properties)
                 
-                success = doc.Objects.Replace(Rhino.DocObjects.ObjRef(brep_object.Id), new_room)
-                
-                # remove if it exists
-                for room in current_model.Rooms:
-                    if room.ObjectId == brep_object.Id:
-                        current_model.Rooms.Remove(room)
-                
-                current_model.Rooms.Add(Rhino.DocObjects.ObjRef(brep_object.Id))
-
+                # Add rooms
+                new_room.Id = brep_object.Id
+                rooms.Add(new_room)
+        
+        if rooms:
+            PollinationRhinoPlugIn.AddHBObjs(doc, rooms)
 doc.Views.Redraw()

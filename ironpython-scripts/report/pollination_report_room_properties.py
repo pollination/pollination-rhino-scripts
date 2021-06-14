@@ -18,11 +18,11 @@ import Eto.Forms as forms
 
 # import pollination part
 import clr
-clr.AddReference('Share.dll')
+clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
-import HoneybeeSchema as HB # csharp version of HB Schema
-import Share as SH # It contains Pollination RhinoObject classes
-import Share.Convert as CO # It contains utilities to convert RhinoObject <> HB Schema
+import HoneybeeSchema as hb # csharp version of HB Schema
+import Core as sh # It contains Pollination RhinoObject classes
+import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
 
 # import List collection
 from System.Collections.Generic import List
@@ -42,14 +42,14 @@ except ImportError as e:
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = SH.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # get all objects
 objects = Rhino.RhinoDoc.ActiveDoc.Objects
 
 # filter by rooms
-rooms = [_ for _ in objects if isinstance(_, SH.Objects.RoomObject)]
+rooms = [_ for _ in objects if isinstance(_, sh.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('No rooms found.')
