@@ -21,7 +21,8 @@ import Honeybee.UI as hu
 from System.Collections.Generic import List
 
 # Pollination Rhino Plugin is inside rhp
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
+id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 
 # SELECTION PART
 #---------------------------------------------------------------------------------------------#
@@ -115,6 +116,7 @@ class RoomGridView(forms.Dialog[list]):
             room = dialog_rc[0]
             energy = room.Properties.Energy
             self._data_dict[e.Row] = energy
+            current_model.SetModelProperty(properties)
 
 def select_objects(layer_table_names):
     objects = []

@@ -23,7 +23,8 @@ import Core as sh # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
 
 # Pollination Rhino Plugin is inside rhp
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
+id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 
 # import List collection
 from System.Collections.Generic import List

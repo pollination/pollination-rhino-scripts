@@ -17,7 +17,8 @@ from Core.Entity import EntityHelper
 from System.Collections.Generic import List
 
 # Pollination Rhino Plugin is inside rhp
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(System.Guid("8b32d89c-3455-4c21-8fd7-7364c32a6feb"))
+id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
+PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 
 # STRATEGY
 # Pollination rooms > JSON > Honeybee rooms > JSON > Pollination rooms
