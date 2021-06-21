@@ -103,7 +103,7 @@ class RoomGridView(forms.Dialog[list]):
         # Properties of the Model
         properties = current_model.HBModelProperties.DuplicateModelProperties()
         room_prop = hb.RoomPropertiesAbridged()
-        dummy_room = hb.Room("", List[hb.Face](), room_prop)
+        dummy_room = hb.Room("empty", List[hb.Face](), room_prop)
         
         # create a List of rooms
         rooms = List[hb.Room]()
