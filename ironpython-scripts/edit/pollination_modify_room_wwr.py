@@ -17,14 +17,10 @@ clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import System.Guid
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as sh # It contains Pollination RhinoObject classes
+import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
-from Core.Entity import EntityHelper
+from Core.Entity import EntityHelper, ModelEntity
 from System.Collections.Generic import List
-
-# Pollination Rhino Plugin is inside rhp
-id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 
 # STRATEGY
 # Pollination rooms > JSON > Honeybee rooms > JSON > Pollination rooms
@@ -35,14 +31,14 @@ PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # get all objects
 objects = Rhino.RhinoDoc.ActiveDoc.Objects
 
 # filter by rooms
-rooms = [_ for _ in objects if isinstance(_, sh.Objects.RoomObject)]
+rooms = [_ for _ in objects if isinstance(_, po.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('No rooms found.')
@@ -276,7 +272,7 @@ for rm in rooms:
     # create new apertures
     apertures = []
     for brp in breps:
-        apt = sh.Objects.ApertureObject(brp)
+        apt = po.Objects.ApertureObject(brp)
         apt.Id = System.Guid.NewGuid()
         apertures.append(apt)
     
@@ -289,8 +285,8 @@ for rm in rooms:
     
     # create a List of rooms
     new_room.Id = rm.Id
-    rooms = List[sh.Objects.RoomObject]()
+    rooms = List[po.Objects.RoomObject]()
     rooms.Add(new_room)
     
-    PollinationRhinoPlugIn.UpdateHBObjs(doc, rooms)
+    ModelEntity.UpdateHBObjs(doc, rooms)
 doc.Views.Redraw()

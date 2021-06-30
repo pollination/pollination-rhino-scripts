@@ -19,12 +19,9 @@ clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import System.Guid
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as sh # It contains Pollination RhinoObject classes
+import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
-
-# Pollination Rhino Plugin is inside rhp
-id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
+from Core.Entity import ModelEntity
 
 # import List collection
 from System.Collections.Generic import List
@@ -41,7 +38,7 @@ simple_glass = hb.EnergyWindowMaterialSimpleGlazSys("my_glass_0_75", 1.5, 0.75, 
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 
 # start the command
 go = Rhino.Input.Custom.GetObject()
@@ -55,7 +52,7 @@ go.AcceptNothing(True)
 go.GetMultiple(0, 0)
 
 # filter by rooms
-rooms = [_.Object() for _ in go.Objects() if isinstance(_.Object(), sh.Objects.RoomObject)]
+rooms = [_.Object() for _ in go.Objects() if isinstance(_.Object(), po.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('Please, select pollination rooms')

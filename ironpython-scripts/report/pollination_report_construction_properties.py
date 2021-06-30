@@ -21,7 +21,7 @@ import clr
 clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as sh # It contains Pollination RhinoObject classes
+import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
 
 # import List collection
@@ -46,7 +46,7 @@ except ImportError as e:
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # REPORTING PART
@@ -166,7 +166,10 @@ for constr in constuctions:
         t_vis = 0
         mass_area_density = constr.mass_area_density
     
-    thickness = constr.thickness
+    if hasattr(constr, 'thickness'):
+        thickness = constr.thickness
+    else:
+        thickness = 0
     
     numeric = [r_val_si, \
                 r_val_ip, u_fac_si, u_fac_ip, \

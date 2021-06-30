@@ -15,14 +15,11 @@ clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 clr.AddReference('Honeybee.UI.Rhino.dll')
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as sh # It contains Pollination RhinoObject classes
+import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
 import Honeybee.UI as hu
+from Core.Entity import ModelEntity
 from System.Collections.Generic import List
-
-# Pollination Rhino Plugin is inside rhp
-id = Rhino.PlugIns.PlugIn.IdFromName("Pollination.RH")
-PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 
 # SELECTION PART
 #---------------------------------------------------------------------------------------------#
@@ -30,7 +27,7 @@ PollinationRhinoPlugIn = Rhino.PlugIns.PlugIn.Find(id)
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 default_height = {
@@ -158,7 +155,7 @@ if rc:
         name, height, checked, geometries, properties = dt
         
         # create a List of rooms
-        rooms = List[sh.Objects.RoomObject]()
+        rooms = List[po.Objects.RoomObject]()
         
         for geo in geometries:
             geo = create_solid(geo, height)
@@ -168,7 +165,7 @@ if rc:
             
             if brep_object:
                 brep = Rhino.Geometry.Brep.TryConvertBrep(brep_object.Geometry)
-                new_room = sh.Objects.RoomObject(brep, tol)
+                new_room = po.Objects.RoomObject(brep, tol)
                 new_room.SetEnergyProp(properties)
                 
                 # Add rooms
@@ -176,5 +173,5 @@ if rc:
                 rooms.Add(new_room)
         
         if rooms:
-            PollinationRhinoPlugIn.AddHBObjs(doc, rooms)
+            ModelEntity.AddHBObjs(doc, rooms)
 doc.Views.Redraw()

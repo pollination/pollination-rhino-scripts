@@ -21,7 +21,7 @@ import clr
 clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as sh # It contains Pollination RhinoObject classes
+import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
 
 # import List collection
@@ -42,14 +42,14 @@ except ImportError as e:
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = sh.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # get all objects
 objects = Rhino.RhinoDoc.ActiveDoc.Objects
 
 # filter by rooms
-rooms = [_ for _ in objects if isinstance(_, sh.Objects.RoomObject)]
+rooms = [_ for _ in objects if isinstance(_, po.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('No rooms found.')
