@@ -17,8 +17,8 @@ clr.AddReference('Pollination.Core.dll')
 clr.AddReference('HoneybeeSchema.dll')
 import System.Guid
 import HoneybeeSchema as hb # csharp version of HB Schema
-import Core as po # It contains Pollination RhinoObject classes
-import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
+import Core as po # It contains Pollination classes
+import Core.Convert as co # RhinoObject <> HB Schema
 from Core.Entity import EntityHelper, ModelEntity
 from System.Collections.Generic import List
 
@@ -34,11 +34,19 @@ a_tol = doc.ModelAngleToleranceRadians
 current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
-# get all objects
-objects = Rhino.RhinoDoc.ActiveDoc.Objects
+# start the command
+go = Rhino.Input.Custom.GetObject()
+
+# set the selection
+go.SetCommandPrompt('Please, select pollination rooms')
+go.GeometryFilter = Rhino.DocObjects.ObjectType.Brep
+go.GroupSelect = False
+go.SubObjectSelect = False
+go.AcceptNothing(True)
+go.GetMultiple(0, 0)
 
 # filter by rooms
-rooms = [_ for _ in objects if isinstance(_, po.Objects.RoomObject)]
+rooms = [_.Object() for _ in go.Objects() if isinstance(_.Object(), po.Objects.RoomObject)]
 
 if not rooms:
     raise ValueError('No rooms found.')
@@ -76,6 +84,9 @@ def divide_by_orientation(angles, face):
 
 def create_brep_from_ratio(face, rat):
     breps = []
+    if face is None:
+        return None
+    
     if is_outdoor_and_wall(face) and has_aperture(face):
         face3ds = face.geometry.sub_faces_by_ratio_rectangle(rat, tol)
         if not face3ds: return
@@ -93,7 +104,8 @@ def get_faces_group_by_orientation(hb_rooms, num_orient=4):
     angles = angles_from_num_orient(num_orient)
     
     # loop through the input objects and add apertures
-    aperture_geometries = []
+    # add default 4 orientation
+    aperture_geometries = [(0, None), (1, None), (2, None), (3, None)]
     for obj in hb_objs:
         apertures = []
         for face in obj.faces:
@@ -113,7 +125,7 @@ def get_faces_group_by_orientation(hb_rooms, num_orient=4):
     for key, group in apt_iterator:
         group_faces.append([_[1] for _ in group])
         group_angles.append(angles[key])
-    
+        
     return group_faces
 
 def get_current_wwr(group_faces, overall = False):
@@ -126,6 +138,8 @@ def get_current_wwr(group_faces, overall = False):
         ratio = 0
         
         for face in faces:
+            if face is None:
+                continue
             if not has_aperture(face) and not overall:
                 continue
             face_wall_area.append(face.area)

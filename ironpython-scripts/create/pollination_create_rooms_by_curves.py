@@ -135,7 +135,7 @@ def create_solid(crv, height):
     return brep
 
 # Get dataset
-layer_table = [_ for _ in Rhino.RhinoDoc.ActiveDoc.Layers if (not _.IsLocked and _.IsValid)]
+layer_table = [_ for _ in Rhino.RhinoDoc.ActiveDoc.Layers if _.IsValid]
 layer_table_names = map(str, layer_table)
 heights = [default_height[doc_unit]] * len(layer_table_names)
 checked = [False] * len(layer_table_names)
