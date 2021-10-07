@@ -11,7 +11,6 @@ Strategy:
     2. Get all Pollination Room Story
     3. Use ExtractSrf and ExtrudeSrf
 """
-# TODO: Fix undo, fix programType
 
 # import rhinocommon and Eto
 import Rhino
@@ -105,24 +104,19 @@ for rm in rooms:
 existing_object = doc.Objects
 rooms = List[po.Objects.RoomObject]()
 
-
 # run ExtractSrf and ExtrudeSrf commands
 Rhino.RhinoApp.RunScript('ExtractSrf Copy=Yes _Enter', False)
 Rhino.RhinoApp.RunScript('ExtrudeSrf Solid=Yes DeleteInput=Yes', False)
-for obj in doc.Objects:
-    if obj not in existing_object:
-        if not isinstance(obj, Rhino.DocObjects.BrepObject):
-            continue
-        
-        brep = Rhino.Geometry.Brep.TryConvertBrep(obj.Geometry)
-        if brep:
-            room_energy_prop = hb.RoomEnergyPropertiesAbridged(programType="Plenum")
-            new_room = po.Objects.RoomObject(brep, tol)
-            new_room.Id = obj.Id
-            new_room.SetEnergyProp(room_energy_prop)
-            
-            rooms.Add(new_room)
 
-if rooms:
-    ModelEntity.AddHBObjs(doc, rooms)
+# unselect all
+doc.Objects.UnselectAll()
+
+# select elements added by the extrusion
+for obj in doc.Objects:
+    if obj not in existing_object.GetObjectList(Rhino.DocObjects.BrepObject):
+        ok = doc.Objects.Select(obj.Id)
+
 doc.Views.Redraw()
+
+# run the command to create rooms
+Rhino.RhinoApp.RunScript('PO_AddRooms Property=Custom _Enter', False)
