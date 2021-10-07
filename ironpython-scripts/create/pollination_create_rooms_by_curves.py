@@ -92,7 +92,10 @@ class RoomGridView(forms.Dialog[list]):
         for i, data in enumerate(self._data):
             name, height, cecked, geometries = data
             if geometries and self._data_dict.has_key(i):
-                out_data.append([name, height, cecked, geometries, self._data_dict[i]])
+                out_data.append([name, 
+                                height,
+                                cecked,
+                                geometries, self._data_dict[i]])
         
         self.Close(out_data)
     
@@ -130,7 +133,8 @@ def select_objects(layer_table_names):
     return objects
 
 def create_solid(crv, height):
-    srf = Rhino.Geometry.Extrusion.CreateExtrusion(crv, Rhino.Geometry.Vector3d(0, 0, float(height))).ToBrep()
+    srf = Rhino.Geometry.Extrusion.CreateExtrusion(crv, 
+        Rhino.Geometry.Vector3d(0, 0, float(height))).ToBrep()
     brep = srf.CapPlanarHoles(tol)
     return brep
 
@@ -143,7 +147,10 @@ checked = [False] * len(layer_table_names)
 # prepare geometries
 geometries = select_objects(layer_table_names)
 
-data = [[n, h, c, g] for n, h, c, g in zip(layer_table_names, heights, checked, geometries)]
+data = [[n, h, c, g] for n, h, c, g in zip(layer_table_names, 
+                                           heights, 
+                                           checked, 
+                                           geometries)]
 
 # run eto
 dialog = RoomGridView(data)
