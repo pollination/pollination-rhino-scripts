@@ -25,7 +25,8 @@ clr.AddReference('HoneybeeSchema.dll')
 import HoneybeeSchema as hb # csharp version of HB Schema
 import Core as po # It contains Pollination RhinoObject classes
 import Core.Convert as co # It contains utilities to convert RhinoObject <> HB Schema
-from Core.Entity import EntityHelper
+from Core import EntityHelper
+
 
 # import List collection
 from System.Collections.Generic import List
@@ -45,7 +46,7 @@ except ImportError as e:
 doc = Rhino.RhinoDoc.ActiveDoc
 tol = doc.ModelAbsoluteTolerance
 a_tol = doc.ModelAngleToleranceRadians
-current_model = po.Entity.ModelEntityTable.Instance.CurrentModelEntity
+current_model = po.ModelEntityTable.Instance
 doc_unit = Rhino.RhinoDoc.ActiveDoc.ModelUnitSystem
 
 # get all objects
